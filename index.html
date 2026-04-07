@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>VenueX · DAPTRA Live Property Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0A1520;--navy2:#0F1E2E;--navy3:#1A2F44;
+  --sage:#4A7C6F;--sage-hi:#5E9E8E;--sage-lo:#2F5048;
+  --amber:#D4830A;--amber-hi:#F0A020;
+  --teal:#17A589;--gold:#D4AC0D;--gold-hi:#F9E79F;
+  --purple:#8E44AD;--white:#FAFCFD;
+  --soft:rgba(232,244,248,0.5);--border:rgba(94,158,142,0.2);
+}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Lato',sans-serif;background:var(--navy);color:var(--white);}
+
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes scan{0%{top:0;}100%{top:100%;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes cardIn{from{opacity:0;transform:scale(0.96) translateY(6px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pinglow{0%,100%{box-shadow:0 0 8px rgba(240,160,32,0.5);}50%{box-shadow:0 0 22px rgba(240,160,32,0.95);}}
+@keyframes pinglowActive{0%,100%{box-shadow:0 0 8px rgba(94,158,142,0.6);}50%{box-shadow:0 0 22px rgba(94,158,142,1);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+@keyframes dataReveal{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+
+/* ── SPLASH ── */
+#splash{
+  position:fixed;inset:0;z-index:200;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(74,124,111,0.08) 0%,transparent 70%),var(--navy);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity 0.8s ease;padding:24px;text-align:center;
+}
+.splash-logo{font-family:'Playfair Display',serif;font-size:clamp(2.4rem,6vw,3.5rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:6px;}
+.splash-logo span{color:var(--sage-hi);}
+.splash-sub{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.22em;color:var(--soft);text-transform:uppercase;margin-bottom:40px;}
+.splash-tagline{font-size:clamp(0.9rem,2vw,1.05rem);color:rgba(232,244,248,0.65);max-width:400px;line-height:1.75;margin-bottom:36px;font-weight:300;}
+.splash-search{width:100%;max-width:480px;margin-bottom:20px;position:relative;}
+.splash-input{
+  width:100%;padding:16px 20px;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(94,158,142,0.3);font-family:'Lato',sans-serif;
+  font-size:0.9rem;color:var(--white);outline:none;transition:border-color 0.3s;
+}
+.splash-input:focus{border-color:var(--sage-hi);}
+.splash-input::placeholder{color:rgba(232,244,248,0.2);}
+.splash-sugg{
+  position:absolute;top:100%;left:0;right:0;
+  background:rgba(10,21,32,0.98);border:1px solid var(--border);border-top:none;
+  z-index:300;display:none;max-height:200px;overflow-y:auto;text-align:left;
+}
+.splash-sugg-item{padding:11px 18px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s;}
+.splash-sugg-item:hover{background:rgba(74,124,111,0.1);}
+.ssi-addr{font-size:0.8rem;color:var(--white);}
+.ssi-detail{font-family:'DM Mono',monospace;font-size:0.52rem;color:var(--soft);letter-spacing:0.06em;margin-top:2px;}
+.splash-btn{
+  font-family:'Lato',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--white);background:var(--sage);border:none;
+  padding:15px 44px;cursor:pointer;transition:background 0.3s,transform 0.2s;
+  box-shadow:0 4px 20px rgba(74,124,111,0.3);
+}
+.splash-btn:hover{background:var(--sage-hi);transform:translateY(-2px);}
+.splash-powered{margin-top:24px;font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:0.14em;color:rgba(255,255,255,0.18);text-transform:uppercase;}
+
+/* ── APP ── */
+#app{width:100%;height:100%;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s ease;}
+
+/* TOPBAR */
+.topbar{
+  height:54px;background:rgba(10,21,32,0.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;flex-shrink:0;z-index:10;gap:12px;
+}
+.tb-logo{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;flex-shrink:0;}
+.tb-logo span{color:var(--sage-hi);}
+.tb-search-wrap{flex:1;max-width:360px;position:relative;}
+.tb-search{
+  width:100%;padding:8px 14px;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(94,158,142,0.2);font-family:'Lato',sans-serif;
+  font-size:0.78rem;color:var(--white);outline:none;transition:border-color 0.3s;
+}
+.tb-search:focus{border-color:var(--sage-hi);}
+.tb-search::placeholder{color:rgba(232,244,248,0.2);}
+.tb-sugg{
+  position:absolute;top:100%;left:0;right:0;
+  background:rgba(10,21,32,0.98);border:1px solid var(--border);border-top:none;
+  z-index:200;display:none;max-height:220px;overflow-y:auto;
+}
+.tb-sugg-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s;}
+.tb-sugg-item:hover{background:rgba(74,124,111,0.1);}
+.tsi-addr{font-size:0.75rem;color:var(--white);}
+.tsi-detail{font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--soft);margin-top:2px;}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tb-badge{font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:0.1em;padding:4px 8px;border:1px solid var(--border);color:var(--sage-hi);text-transform:uppercase;}
+.tb-loc{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;color:var(--teal);display:flex;align-items:center;gap:5px;}
+.tb-loc::before{content:'◉';animation:pulse 2s infinite;}
+
+/* MAP */
+.map-area{flex:1;position:relative;overflow:hidden;}
+.ar-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(10,21,32,0.12) 0%,rgba(15,30,46,0.08) 50%,rgba(10,21,32,0.18) 100%),
+  url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover no-repeat;
+  transition:opacity 0.3s;
+}
+.ar-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(94,158,142,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(94,158,142,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;}
+.ar-scanline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(94,158,142,0.35),transparent);animation:scan 5s linear infinite;pointer-events:none;}
+.ar-corner{position:absolute;width:28px;height:28px;pointer-events:none;}
+.ar-corner.tl{top:14px;left:14px;border-top:2px solid var(--sage-hi);border-left:2px solid var(--sage-hi);}
+.ar-corner.tr{top:14px;right:14px;border-top:2px solid var(--sage-hi);border-right:2px solid var(--sage-hi);}
+.ar-corner.bl{bottom:76px;left:14px;border-bottom:2px solid var(--sage-hi);border-left:2px solid var(--sage-hi);}
+.ar-corner.br{bottom:76px;right:14px;border-bottom:2px solid var(--sage-hi);border-right:2px solid var(--sage-hi);}
+.ar-status{position:absolute;top:14px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.14em;color:var(--sage-hi);text-transform:uppercase;background:rgba(10,21,32,0.75);padding:5px 14px;border:1px solid var(--border);backdrop-filter:blur(8px);white-space:nowrap;}
+
+/* PINS */
+.pin{position:absolute;cursor:pointer;transform:translate(-50%,-100%);transition:transform 0.2s;z-index:5;}
+.pin:hover{transform:translate(-50%,-100%) scale(1.12);}
+.pin-dot{width:13px;height:13px;border-radius:50%;background:var(--amber-hi);border:2px solid rgba(255,255,255,0.85);margin:0 auto;animation:pinglow 2s ease infinite;}
+.pin-dot.active{background:var(--sage-hi);animation:pinglowActive 2s ease infinite;}
+.pin-dot.loading{background:rgba(255,255,255,0.4);animation:pulse 0.8s ease infinite;}
+.pin-label{font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:0.06em;color:var(--white);background:rgba(10,21,32,0.88);padding:3px 7px;white-space:nowrap;margin-bottom:4px;text-align:center;border:1px solid var(--border);backdrop-filter:blur(6px);}
+
+/* PROPERTY CARD */
+.prop-card{
+  position:absolute;z-index:20;width:300px;
+  background:rgba(8,18,30,0.95);border:1px solid var(--sage-hi);
+  backdrop-filter:blur(18px);
+  box-shadow:0 8px 48px rgba(0,0,0,0.6),0 0 0 1px rgba(94,158,142,0.08);
+  display:none;animation:cardIn 0.3s ease both;
+}
+.card-header{padding:13px 15px 9px;border-bottom:1px solid rgba(94,158,142,0.12);display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.card-address{font-family:'Playfair Display',serif;font-size:0.88rem;font-weight:600;line-height:1.3;flex:1;}
+.card-close{width:20px;height:20px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);font-size:0.6rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.card-close:hover{border-color:#e74c3c;color:#e74c3c;}
+.card-apn{font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:0.1em;color:var(--soft);padding:0 15px 9px;}
+
+/* LOADING STATE */
+.card-loading{padding:20px;text-align:center;}
+.card-spinner{width:24px;height:24px;border:2px solid rgba(94,158,142,0.2);border-top-color:var(--sage-hi);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 10px;}
+.card-loading-text{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.12em;color:var(--soft);text-transform:uppercase;}
+
+/* TOGGLES */
+.toggles{padding:8px 12px;display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid rgba(94,158,142,0.08);}
+.tog{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.07em;text-transform:uppercase;padding:3px 7px;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.2s;background:transparent;}
+.tog.on{border-color:var(--sage);color:var(--sage-hi);background:rgba(74,124,111,0.1);}
+.tog:hover{border-color:var(--sage);color:var(--sage-hi);}
+
+/* DATA ROWS */
+.data-rows{padding:10px 14px;}
+.data-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px;overflow:hidden;transition:max-height 0.3s ease,opacity 0.3s ease,padding 0.3s;max-height:36px;animation:dataReveal 0.3s ease both;}
+.data-row.hidden{max-height:0;opacity:0;padding:0;border:none;}
+.dr-label{font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:0.07em;color:var(--soft);text-transform:uppercase;flex-shrink:0;}
+.dr-val{font-size:0.72rem;color:var(--white);text-align:right;font-weight:400;line-height:1.3;}
+.dr-val.amber{color:var(--amber-hi);}
+.dr-val.sage{color:var(--sage-hi);}
+.dr-val.gold{color:var(--gold-hi);}
+.dr-val.purple{color:#C39BD3;}
+
+/* SOURCE BADGE */
+.source-badge{padding:6px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(94,158,142,0.08);}
+.sb-live{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.1em;color:var(--teal);text-transform:uppercase;display:flex;align-items:center;gap:5px;}
+.sb-live::before{content:'●';font-size:0.5rem;animation:pulse 1.5s infinite;}
+.sb-demo{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.1em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+
+/* DAPTRA BADGE */
+.daptra-badge{margin:8px 14px 12px;padding:9px 11px;background:linear-gradient(135deg,rgba(74,124,111,0.1),rgba(74,124,111,0.04));border:1px solid rgba(94,158,142,0.18);display:flex;align-items:center;gap:9px;cursor:pointer;transition:all 0.2s;}
+.daptra-badge:hover{border-color:var(--sage-hi);background:rgba(74,124,111,0.16);}
+.db-icon{width:26px;height:26px;background:var(--sage);display:flex;align-items:center;justify-content:center;font-size:0.65rem;flex-shrink:0;}
+.db-title{font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:0.1em;color:var(--sage-hi);text-transform:uppercase;margin-bottom:2px;}
+.db-sub{font-size:0.6rem;color:rgba(255,255,255,0.35);}
+
+/* CONTROLS */
+.ar-controls{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:rgba(10,21,32,0.88);backdrop-filter:blur(12px);padding:9px 18px;border:1px solid var(--border);z-index:10;flex-wrap:wrap;justify-content:center;}
+.ctrl-label{font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:0.1em;color:var(--soft);text-transform:uppercase;white-space:nowrap;}
+input[type=range]{-webkit-appearance:none;width:100px;height:3px;background:linear-gradient(90deg,var(--sage) 0%,var(--sage) 60%,rgba(255,255,255,0.1) 60%);outline:none;border-radius:2px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--sage-hi);cursor:pointer;border:2px solid var(--white);}
+.ctrl-div{width:1px;height:18px;background:var(--border);}
+.ctrl-btn{font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:0.08em;padding:4px 9px;border:1px solid var(--border);color:var(--soft);background:transparent;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+.ctrl-btn.active,.ctrl-btn:hover{border-color:var(--sage-hi);color:var(--sage-hi);}
+
+/* TRAY */
+.tray{height:68px;background:rgba(10,21,32,0.96);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;padding:0 14px;overflow-x:auto;flex-shrink:0;}
+.tray::-webkit-scrollbar{height:2px;}
+.tray::-webkit-scrollbar-thumb{background:var(--sage);}
+.tray-item{flex-shrink:0;padding:7px 12px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.02);min-width:120px;}
+.tray-item:hover,.tray-item.active{border-color:var(--sage-hi);background:rgba(74,124,111,0.1);}
+.tray-addr{font-size:0.65rem;color:var(--white);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tray-val{font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--amber-hi);letter-spacing:0.05em;}
+.tray-live{font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--teal);letter-spacing:0.08em;text-transform:uppercase;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(5,10,18,0.88);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--navy2);border:1px solid var(--sage-hi);max-width:400px;width:100%;max-height:85vh;overflow-y:auto;animation:cardIn 0.3s ease both;}
+.modal-hdr{padding:18px 20px 13px;border-bottom:1px solid rgba(94,158,142,0.15);display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;}
+.modal-close{background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);padding:3px 9px;cursor:pointer;font-size:0.75rem;transition:all 0.2s;}
+.modal-close:hover{border-color:var(--sage);color:var(--sage-hi);}
+.modal-body{padding:18px 20px;}
+.ms-title{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.14em;color:var(--sage-hi);text-transform:uppercase;margin-bottom:7px;}
+.ms-text{font-size:0.75rem;color:rgba(232,244,248,0.55);line-height:1.65;margin-bottom:16px;}
+.chip-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px;}
+.chip{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.08em;padding:3px 7px;border:1px solid rgba(94,158,142,0.2);color:var(--sage-hi);text-transform:uppercase;}
+.mint-btn{width:100%;padding:13px;background:var(--sage);color:var(--white);border:none;font-family:'Lato',sans-serif;font-weight:700;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.3s;}
+.mint-btn:hover{background:var(--sage-hi);}
+
+@media(max-width:600px){
+  .tb-loc{display:none;}
+  .ar-controls{padding:7px 12px;gap:8px;}
+  .prop-card{width:260px;}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo">Venue<span>X</span></div>
+  <div class="splash-sub">Spatial Property Intelligence · Powered by DAPTRA & Regrid</div>
+  <div class="splash-tagline">The world's first AR property intelligence layer. See every property's story — real data, overlaid on the real world.</div>
+  <div class="splash-search">
+    <input class="splash-input" id="splashInput" type="text" placeholder="Search any US address to begin..." autocomplete="off" oninput="onSplashInput(this)" onkeydown="if(event.key==='Enter')launchApp()">
+    <div class="splash-sugg" id="splashSugg"></div>
+  </div>
+  <button class="splash-btn" onclick="launchApp()">Launch AR Demo →</button>
+  <div class="splash-powered">Live Regrid Parcel Data · Pier 15 · San Francisco Embarcadero</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="tb-logo">Venue<span>X</span></div>
+    <div class="tb-search-wrap">
+      <input class="tb-search" id="tbSearch" type="text" placeholder="Search any address..." autocomplete="off" oninput="onTbInput(this)" onkeydown="if(event.key==='Enter')doTbSearch()">
+      <div class="tb-sugg" id="tbSugg"></div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-loc">Pier 15 · SF Embarcadero</div>
+      <div class="tb-badge">AR Live</div>
+      <div class="tb-badge" style="border-color:rgba(23,165,137,0.4);color:var(--teal);">Regrid ●</div>
+    </div>
+  </div>
+
+  <div class="map-area" id="mapArea">
+    <div class="ar-bg" id="arBg"></div>
+    <div class="ar-grid"></div>
+    <div class="ar-scanline"></div>
+    <div class="ar-corner tl"></div>
+    <div class="ar-corner tr"></div>
+    <div class="ar-corner bl"></div>
+    <div class="ar-corner br"></div>
+    <div class="ar-status" id="arStatus">◈ AR OVERLAY ACTIVE · SCANNING PARCELS</div>
+
+    <div class="prop-card" id="propCard">
+      <div class="card-header">
+        <div class="card-address" id="cardAddr">—</div>
+        <button class="card-close" onclick="closeCard()">✕</button>
+      </div>
+      <div class="card-apn" id="cardApn">APN: —</div>
+      <div id="cardBody">
+        <div class="card-loading">
+          <div class="card-spinner"></div>
+          <div class="card-loading-text">Fetching live parcel data...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ar-controls">
+      <span class="ctrl-label">Overlay</span>
+      <input type="range" min="0" max="100" value="60" oninput="updateOpacity(this)">
+      <div class="ctrl-div"></div>
+      <button class="ctrl-btn active" onclick="filterPins('all',this)">All</button>
+      <button class="ctrl-btn" onclick="filterPins('commercial',this)">Commercial</button>
+      <button class="ctrl-btn" onclick="filterPins('port',this)">Port</button>
+      <button class="ctrl-btn" onclick="filterPins('mixed',this)">Mixed</button>
+    </div>
+  </div>
+
+  <div class="tray" id="tray"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <div class="modal-title">NFTitleMint</div>
+      <button class="modal-close" onclick="closeModal()">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="ms-title">Property</div>
+      <div class="ms-text" id="modalAddr">—</div>
+      <div class="ms-title">What Happens</div>
+      <div class="ms-text">Your title is minted as a non-transferable NFT anchored to your wallet + verified market appraisal. A permanent Web3 URL is created — your property's digital passport. Nothing moves without your wallet signature.</div>
+      <div class="ms-title">Supported Chains</div>
+      <div class="chip-row">
+        <div class="chip">LayerZero</div><div class="chip">XRP</div><div class="chip">Chainlink</div>
+        <div class="chip">Stellar</div><div class="chip">Algorand</div><div class="chip">ERC-3643</div>
+      </div>
+      <button class="mint-btn">Mint This Title on DAPTRA →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const REGRID_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyZWdyaWQuY29tIiwiaWF0IjoxNzczNDQ2Mzg2LCJleHAiOjE3NzYwMzgzODYsInUiOjcxOTYwNCwiZyI6MjMxNTMsImNhcCI6InBhOnRzOnBzOmJmOm1hOnR5OmVvOnpvOnNiIn0.fzIZl4-6kDus5mLzq9k4Phh3ffakidxXWx_iOZ8AQKo';
+const REGRID_BASE = 'https://app.regrid.com/api/v1';
+
+// Embarcadero anchor parcels — used to populate map pins
+// Regrid will be called live when each pin is tapped
+const PINS = [
+  {id:'p1',type:'port',label:'Pier 15',pinX:'52%',pinY:'38%',
+   query:'Pier 15 Embarcadero San Francisco CA',
+   fallback:{address:'Pier 15, The Embarcadero, SF',apn:'004-001-0150',fields:{'Year Built':'1931/2013','Use':'Exploratorium Museum','Owner':'Port of San Francisco','Assessed Value':'$0 (Port Authority)','Market Est.':'~$185M','Last Sale':'N/A Port Property','Sq Ft':'330,000 sf','Zoning':'P (Public)','Mortgage':'None'}}},
+  {id:'p2',type:'commercial',label:'Ferry Building',pinX:'68%',pinY:'55%',
+   query:'1 Ferry Building Embarcadero San Francisco CA 94111',
+   fallback:{address:'1 Ferry Building, SF CA 94111',apn:'007-001-0010',fields:{'Year Built':'1898/2003','Use':'Mixed Retail/Office','Owner':'Port of SF / Wilson Meany','Assessed Value':'$114,200,000','Market Est.':'~$380M','Last Sale':'$96M · 2002','Sq Ft':'245,000 sf','Zoning':'C-2','Mortgage':'$72M — Deutsche Bank'}}},
+  {id:'p3',type:'commercial',label:'75 Howard St',pinX:'72%',pinY:'66%',
+   query:'75 Howard Street San Francisco CA 94105',
+   fallback:{address:'75 Howard St, San Francisco CA',apn:'004-007-0110',fields:{'Year Built':'1972/2019','Use':'Class A Office','Owner':'Paramount Group','Assessed Value':'$88,500,000','Market Est.':'~$210M','Last Sale':'$148M · 2015','Sq Ft':'318,000 sf','Zoning':'C-3-O','Mortgage':'$95M — Wells Fargo'}}},
+  {id:'p4',type:'mixed',label:'200 Embarcadero',pinX:'60%',pinY:'48%',
+   query:'200 The Embarcadero San Francisco CA',
+   fallback:{address:'200 The Embarcadero, SF CA',apn:'004-003-0080',fields:{'Year Built':'2001','Use':'Mixed Use/Residential','Owner':'Embarcadero Holdings LLC','Assessed Value':'$42,100,000','Market Est.':'~$89M','Last Sale':'$71M · 2018','Sq Ft':'124,000 sf','Zoning':'C-3-S','Mortgage':'$38M — First Republic'}}},
+  {id:'p5',type:'port',label:'Pier 17',pinX:'46%',pinY:'31%',
+   query:'Pier 17 Embarcadero San Francisco CA',
+   fallback:{address:'Pier 17, The Embarcadero, SF',apn:'004-001-0170',fields:{'Year Built':'1942','Use':'Port Facility','Owner':'Port of San Francisco','Assessed Value':'$0 (Port Authority)','Market Est.':'~$28M','Last Sale':'N/A Port Property','Sq Ft':'85,000 sf','Zoning':'P (Public)','Mortgage':'None'}}},
+  {id:'p6',type:'commercial',label:'4 Embarcadero Ctr',pinX:'56%',pinY:'60%',
+   query:'4 Embarcadero Center San Francisco CA 94111',
+   fallback:{address:'4 Embarcadero Center, SF CA',apn:'006-003-0040',fields:{'Year Built':'1982','Use':'Class A Office Tower','Owner':'Boston Properties','Assessed Value':'$195,800,000','Market Est.':'~$520M','Last Sale':'$312M · 1998','Sq Ft':'958,000 sf','Zoning':'C-3-O','Mortgage':'$280M — MetLife'}}},
+  {id:'p7',type:'mixed',label:'Pier 3',pinX:'38%',pinY:'44%',
+   query:'Pier 3 Embarcadero San Francisco CA',
+   fallback:{address:'Pier 3, The Embarcadero, SF',apn:'004-001-0030',fields:{'Year Built':'1912/2005','Use':'Office/Event Space','Owner':'Giants Enterprises LLC','Assessed Value':'$31,200,000','Market Est.':'~$67M','Last Sale':'$44M · 2005','Sq Ft':'73,000 sf','Zoning':'P/Mixed','Mortgage':'$22M — Chase'}}}
+];
+
+const TOGGLES = [
+  {key:'Year Built',label:'Built'},{key:'Use',label:'Use'},
+  {key:'Owner',label:'Owner'},{key:'Assessed Value',label:'Assessed'},
+  {key:'Market Est.',label:'Market'},{key:'Last Sale',label:'Last Sale'},
+  {key:'Sq Ft',label:'Size'},{key:'Zoning',label:'Zoning'},{key:'Mortgage',label:'Mortgage'}
+];
+let activeToggles = new Set(['Year Built','Owner','Assessed Value','Market Est.','Last Sale','Mortgage']);
+let activePin = null;
+let parcelCache = {};
+let debounce;
+
+// ── SPLASH SEARCH ──
+function onSplashInput(el){
+  clearTimeout(debounce);
+  const v = el.value.trim();
+  if(v.length<3){document.getElementById('splashSugg').style.display='none';return;}
+  debounce = setTimeout(()=>fetchSugg(v,'splashSugg',true),400);
+}
+
+async function fetchSugg(q,elId,isSplash){
+  try{
+    // Typeahead for real address autocomplete — nationwide
+    const r = await fetch(`${REGRID_BASE}/typeahead?query=${encodeURIComponent(q)}&token=${REGRID_KEY}&limit=5`);
+    const d = await r.json();
+    const parcels = d.parcel_centroids?.features || d.results || [];
+    const items = parcels.map(p=>({
+      address: p.properties?.fields?.address || p.properties?.address || q,
+      apn: p.properties?.fields?.parcelnumb || '—',
+      uuid: p.properties?.fields?.ll_uuid || null,
+      raw: p
+    }));
+    renderSugg(items,elId,isSplash);
+  }catch(e){document.getElementById(elId).style.display='none';}
+}
+
+async function fetchParcelFull(uuid){
+  try{
+    const r = await fetch(`${REGRID_BASE}/parcel.json?ll_uuid=${uuid}&token=${REGRID_KEY}&return_custom=true`);
+    const d = await r.json();
+    return d.results?.[0] || null;
+  }catch(e){ return null; }
+}
+
+function renderSugg(items,elId,isSplash){
+  const el = document.getElementById(elId);
+  if(!items.length){el.style.display='none';return;}
+  el.innerHTML = items.map((it,i)=>`
+    <div class="${isSplash?'splash-sugg-item':'tb-sugg-item'}" onclick="selectSugg(${i},'${elId}',${isSplash})">
+      <div class="${isSplash?'ssi-addr':'tsi-addr'}">${it.address}</div>
+      <div class="${isSplash?'ssi-detail':'tsi-detail'}">APN: ${it.apn}</div>
+    </div>
+  `).join('');
+  el._items = items;
+  el.style.display='block';
+}
+
+function selectSugg(i,elId,isSplash){
+  const items = document.getElementById(elId)._items||[];
+  const it = items[i];
+  if(!it) return;
+  document.getElementById(elId).style.display='none';
+  if(isSplash){
+    document.getElementById('splashInput').value = it.address;
+    launchApp(it);
+  } else {
+    document.getElementById('tbSearch').value = it.address;
+    showSearchResult(it);
+  }
+}
+
+// ── TB SEARCH ──
+function onTbInput(el){
+  clearTimeout(debounce);
+  const v = el.value.trim();
+  if(v.length<3){document.getElementById('tbSugg').style.display='none';return;}
+  debounce = setTimeout(()=>fetchSugg(v,'tbSugg',false),400);
+}
+
+async function doTbSearch(){
+  const q = document.getElementById('tbSearch').value.trim();
+  if(!q) return;
+  document.getElementById('tbSugg').style.display='none';
+  // Add a custom pin for searched address
+  try{
+    const r = await fetch(`${REGRID_BASE}/search?query=${encodeURIComponent(q)}&token=${REGRID_KEY}&limit=1`);
+    const d = await r.json();
+    const p = d.results?.[0];
+    if(p) showSearchResult({address:p.fields?.address||q,apn:p.fields?.parcelnumb||'—',raw:p});
+  }catch(e){}
+}
+
+function showSearchResult(it){
+  // Show in a floating card in center of map
+  const card = document.getElementById('propCard');
+  const map = document.getElementById('mapArea');
+  const mw = map.offsetWidth, mh = map.offsetHeight;
+  card.style.left = (mw/2 - 150)+'px';
+  card.style.top = '80px';
+  card.style.display='block';
+  document.getElementById('cardAddr').textContent = it.address;
+  document.getElementById('cardApn').textContent = 'APN: '+it.apn;
+  if(it.raw) renderRegridData(it.raw, true);
+  document.getElementById('modalAddr').textContent = it.address;
+}
+
+// ── LAUNCH ──
+function launchApp(preload){
+  const splash = document.getElementById('splash');
+  const app = document.getElementById('app');
+  splash.style.opacity='0';
+  setTimeout(()=>{
+    splash.style.display='none';
+    app.style.opacity='1';
+    buildPins();
+    buildTray();
+    updateArStatus();
+    if(preload) showSearchResult(preload);
+  },800);
+}
+
+function buildPins(){
+  const map = document.getElementById('mapArea');
+  PINS.forEach(p=>{
+    const el = document.createElement('div');
+    el.className='pin';el.id='pin-'+p.id;
+    el.style.left=p.pinX;el.style.top=p.pinY;
+    el.dataset.type=p.type;
+    el.innerHTML=`<div class="pin-label">${p.label}</div><div class="pin-dot" id="dot-${p.id}"></div>`;
+    el.onclick=()=>tapPin(p);
+    map.appendChild(el);
+  });
+}
+
+function buildTray(){
+  const tray = document.getElementById('tray');
+  PINS.forEach(p=>{
+    const el = document.createElement('div');
+    el.className='tray-item';el.id='tray-'+p.id;
+    el.innerHTML=`<div class="tray-addr">${p.label}</div><div class="tray-val">Tap for live data</div><div class="tray-live">● Regrid</div>`;
+    el.onclick=()=>tapPin(p);
+    tray.appendChild(el);
+  });
+}
+
+function updateArStatus(){
+  document.getElementById('arStatus').textContent=`◈ AR OVERLAY ACTIVE · ${PINS.length} PARCELS DETECTED · REGRID LIVE`;
+}
+
+// ── PIN TAP → REGRID FETCH ──
+async function tapPin(p){
+  activePin=p;
+  document.querySelectorAll('.tray-item').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('active','loading');});
+  document.getElementById('tray-'+p.id)?.classList.add('active');
+  const dot = document.getElementById('dot-'+p.id);
+  dot.classList.add('loading');
+
+  // Position card
+  const card = document.getElementById('propCard');
+  const pin = document.getElementById('pin-'+p.id);
+  const map = document.getElementById('mapArea');
+  const mr = map.getBoundingClientRect();
+  const pr = pin.getBoundingClientRect();
+  let left = pr.left - mr.left + 20;
+  let top = pr.top - mr.top - 20;
+  if(left+310>mr.width) left = pr.left - mr.left - 320;
+  if(top+440>mr.height) top = mr.height-450;
+  if(top<10) top=10;
+  card.style.left=left+'px';card.style.top=top+'px';
+  card.style.display='block';
+  document.getElementById('cardAddr').textContent=p.label;
+  document.getElementById('cardApn').textContent='Fetching parcel data...';
+  document.getElementById('cardBody').innerHTML=`<div class="card-loading"><div class="card-spinner"></div><div class="card-loading-text">Querying Regrid Enterprise...</div></div>`;
+  document.getElementById('modalAddr').textContent=p.label;
+
+  // Check cache
+  if(parcelCache[p.id]){
+    dot.classList.remove('loading');dot.classList.add('active');
+    renderParcel(parcelCache[p.id],p,true);
+    return;
+  }
+
+  try{
+    // Step 1: typeahead to get uuid
+    const r = await fetch(`${REGRID_BASE}/typeahead?query=${encodeURIComponent(p.query)}&token=${REGRID_KEY}&limit=1`);
+    const d = await r.json();
+    const features = d.parcel_centroids?.features || d.results || [];
+    const uuid = features[0]?.properties?.fields?.ll_uuid || features[0]?.properties?.ll_uuid || null;
+    let result = null;
+    if(uuid){
+      // Step 2: fetch full parcel by uuid
+      const r2 = await fetch(`${REGRID_BASE}/parcel.json?ll_uuid=${uuid}&token=${REGRID_KEY}&return_custom=true`);
+      const d2 = await r2.json();
+      result = d2.results?.[0] || null;
+    }
+    dot.classList.remove('loading');dot.classList.add('active');
+    if(result){
+      parcelCache[p.id]=result;
+      renderParcel(result,p,true);
+      updateTrayLive(p.id, result);
+    } else {
+      renderParcel(null,p,false);
+    }
+  }catch(e){
+    dot.classList.remove('loading');dot.classList.add('active');
+    renderParcel(null,p,false);
+  }
+}
+
+function normalizeRegrid(r){
+  const f=r.fields||{};
+  const assessed = f.landval&&f.improvval ? '$'+(Number(f.landval)+Number(f.improvval)).toLocaleString() : f.saleprice?'$'+Number(f.saleprice).toLocaleString():'—';
+  return {
+    'Year Built': f.yearbuilt||'—',
+    'Use': f.usedesc||f.usecode||'—',
+    'Owner': f.owner||'—',
+    'Assessed Value': assessed,
+    'Market Est.': f.landval?'$'+Math.round((Number(f.landval)+Number(f.improvval||0))*1.4).toLocaleString():'—',
+    'Last Sale': f.saledate?(f.saledate+(f.saleprice?' · $'+Number(f.saleprice).toLocaleString():'')):'—',
+    'Sq Ft': f.sqft?Number(f.sqft).toLocaleString()+' sf':'—',
+    'Zoning': f.zoning||'—',
+    'Mortgage': '—'
+  };
+}
+
+function renderParcel(result, p, isLive){
+  const fields = result ? normalizeRegrid(result) : p.fallback.fields;
+  const apn = result?.fields?.parcelnumb || p.fallback.apn;
+  document.getElementById('cardApn').textContent='APN: '+apn;
+
+  const togHtml = TOGGLES.map(t=>`<button class="tog${activeToggles.has(t.key)?' on':''}" onclick="toggleField('${t.key}',this)">${t.label}</button>`).join('');
+
+  const rowsHtml = TOGGLES.map((t,i)=>{
+    const v=fields[t.key]||'—';
+    const hidden=!activeToggles.has(t.key);
+    let cls='dr-val';
+    if(t.key==='Market Est.'||t.key==='Last Sale') cls+=' amber';
+    if(t.key==='Owner') cls+=' sage';
+    if(t.key==='Assessed Value') cls+=' gold';
+    if(t.key==='Mortgage') cls+=' purple';
+    return `<div class="data-row${hidden?' hidden':''}" id="row-${t.key.replace(/\s/g,'_')}" style="animation-delay:${i*0.04}s"><span class="dr-label">${t.key}</span><span class="${cls}">${v}</span></div>`;
+  }).join('');
+
+  document.getElementById('cardBody').innerHTML=`
+    <div class="source-badge">
+      ${isLive?'<span class="sb-live">Regrid Live Data</span>':'<span class="sb-demo">Demo Fallback Data</span>'}
+    </div>
+    <div class="toggles">${togHtml}</div>
+    <div class="data-rows">${rowsHtml}</div>
+    <div class="daptra-badge" onclick="showModal()">
+      <div class="db-icon">⬡</div>
+      <div><div class="db-title">NFTitleMint Available</div><div class="db-sub">Tokenize on DAPTRA →</div></div>
+    </div>
+  `;
+}
+
+function renderRegridData(raw, isLive){
+  const fields = normalizeRegrid(raw);
+  const apn = raw.fields?.parcelnumb||'—';
+  document.getElementById('cardApn').textContent='APN: '+apn;
+  const rowsHtml = Object.entries(fields).map(([k,v],i)=>{
+    let cls='dr-val';
+    if(k==='Market Est.'||k==='Last Sale') cls+=' amber';
+    if(k==='Owner') cls+=' sage';
+    if(k==='Assessed Value') cls+=' gold';
+    return `<div class="data-row" style="animation-delay:${i*0.04}s"><span class="dr-label">${k}</span><span class="${cls}">${v}</span></div>`;
+  }).join('');
+  document.getElementById('cardBody').innerHTML=`
+    <div class="source-badge"><span class="sb-live">Regrid Live Data</span></div>
+    <div class="data-rows">${rowsHtml}</div>
+    <div class="daptra-badge" onclick="showModal()">
+      <div class="db-icon">⬡</div>
+      <div><div class="db-title">NFTitleMint Available</div><div class="db-sub">Tokenize on DAPTRA →</div></div>
+    </div>
+  `;
+}
+
+function updateTrayLive(id, result){
+  const tray = document.getElementById('tray-'+id);
+  if(!tray) return;
+  const f=result.fields||{};
+  const val = f.landval?'$'+Math.round((Number(f.landval)+Number(f.improvval||0))*1.4).toLocaleString():'Live';
+  tray.querySelector('.tray-val').textContent=val;
+}
+
+function toggleField(key,btn){
+  if(activeToggles.has(key)){activeToggles.delete(key);btn.classList.remove('on');}
+  else{activeToggles.add(key);btn.classList.add('on');}
+  const row=document.getElementById('row-'+key.replace(/\s/g,'_'));
+  if(row) row.classList.toggle('hidden',!activeToggles.has(key));
+}
+
+function closeCard(){
+  document.getElementById('propCard').style.display='none';
+  document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('active','loading'));
+  document.querySelectorAll('.tray-item').forEach(t=>t.classList.remove('active'));
+  activePin=null;
+}
+
+function updateOpacity(s){document.getElementById('arBg').style.opacity=0.3+(s.value/100)*0.7;}
+
+function filterPins(type,btn){
+  document.querySelectorAll('.ctrl-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  PINS.forEach(p=>{
+    const el=document.getElementById('pin-'+p.id);
+    el.style.display=(type==='all'||p.type===type)?'block':'none';
+  });
+  closeCard();
+}
+
+function showModal(){document.getElementById('modal').style.display='flex';}
+function closeModal(e){if(!e||e.target===document.getElementById('modal'))document.getElementById('modal').style.display='none';}
+</script>
+</body>
+</html>
