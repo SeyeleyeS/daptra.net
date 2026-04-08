@@ -1,6 +1,564 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAPTRA Ecosystem v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#070F18;--navy2:#0F1E2E;--navy3:#1A2F44;
+  --sage:#4A7C6F;--sage-hi:#5E9E8E;--sage-lo:#2F5048;
+  --amber:#D4830A;--amber-hi:#F0A020;
+  --purple:#6C3483;--purple-hi:#8E44AD;
+  --blue:#1A5276;--blue-hi:#2980B9;
+  --teal:#0E6655;--teal-hi:#17A589;
+  --gold:#B7950B;--gold-hi:#D4AC0D;
+  --rose:#922B21;--rose-hi:#C0392B;
+  --white:#FAFCFD;--soft:rgba(232,244,248,0.5);
+  --border:rgba(94,158,142,0.18);
+}
+body{font-family:'Lato',sans-serif;background:var(--navy);color:var(--white);min-height:100vh;padding:36px 28px;}
+
+/* VERSION BAR */
+.vbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;padding:9px 14px;border:1px solid rgba(94,158,142,0.12);background:rgba(94,158,142,0.04);}
+.vtag{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.2em;color:var(--sage-hi);text-transform:uppercase;}
+.vdate{font-family:'DM Mono',monospace;font-size:0.52rem;color:rgba(255,255,255,0.18);letter-spacing:0.1em;}
+
+h1{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;text-align:center;margin-bottom:5px;letter-spacing:-0.02em;}
+h1 span{color:var(--sage-hi);}
+.subtitle{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.2em;color:rgba(255,255,255,0.25);text-align:center;margin-bottom:44px;text-transform:uppercase;}
+
+/* SOVEREIGN IDENTITY STACK — HERO SECTION */
+.identity-stack{
+  margin-bottom:32px;
+  border:1px solid rgba(94,158,142,0.25);
+  background:linear-gradient(135deg,rgba(74,124,111,0.06),rgba(74,124,111,0.02));
+  padding:24px;
+}
+.is-title{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:var(--sage-hi);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.is-title::after{content:'';flex:1;height:1px;background:rgba(94,158,142,0.15);}
+.is-tagline{font-family:'Playfair Display',serif;font-size:clamp(1rem,2.5vw,1.4rem);font-weight:600;color:var(--white);margin-bottom:6px;line-height:1.3;}
+.is-sub{font-size:0.75rem;color:var(--soft);margin-bottom:20px;line-height:1.65;max-width:640px;}
+.anchors{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.anchor{padding:14px 12px;text-align:center;position:relative;}
+.anchor.sage{background:rgba(74,124,111,0.08);border:1px solid rgba(94,158,142,0.25);}
+.anchor.amber{background:rgba(212,131,10,0.06);border:1px solid rgba(212,131,10,0.22);}
+.anchor.purple{background:rgba(108,52,131,0.08);border:1px solid rgba(142,68,173,0.22);}
+.anchor.blue{background:rgba(26,82,118,0.08);border:1px solid rgba(41,128,185,0.22);}
+.anchor.gold{background:rgba(183,149,11,0.06);border:1px solid rgba(212,172,13,0.22);}
+.anchor-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;opacity:0.12;line-height:1;margin-bottom:6px;}
+.anchor-icon{font-size:1.2rem;margin-bottom:6px;}
+.anchor-name{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+.anchor.sage .anchor-name{color:var(--sage-hi);}
+.anchor.amber .anchor-name{color:var(--amber-hi);}
+.anchor.purple .anchor-name{color:#C39BD3;}
+.anchor.blue .anchor-name{color:#7FB3D3;}
+.anchor.gold .anchor-name{color:var(--gold-hi);}
+.anchor-desc{font-size:0.62rem;color:rgba(232,244,248,0.4);line-height:1.5;}
+.anchor-abbr{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.12em;margin-top:6px;opacity:0.6;}
+.anchor.sage .anchor-abbr{color:var(--sage-hi);}
+.anchor.amber .anchor-abbr{color:var(--amber-hi);}
+.anchor.purple .anchor-abbr{color:#C39BD3;}
+.anchor.blue .anchor-abbr{color:#7FB3D3;}
+.anchor.gold .anchor-abbr{color:var(--gold-hi);}
+
+/* LAYER SYSTEM */
+.layer{margin-bottom:24px;}
+.layer-label{font-family:'DM Mono',monospace;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.layer-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.05);}
+.nodes{display:grid;gap:12px;}
+.cols-1{grid-template-columns:1fr;max-width:500px;margin:0 auto;}
+.cols-2{grid-template-columns:1fr 1fr;}
+.cols-3{grid-template-columns:repeat(3,1fr);}
+.cols-4{grid-template-columns:repeat(4,1fr);}
+
+/* NODE CARDS */
+.node{padding:16px 15px;transition:transform 0.25s,box-shadow 0.25s;cursor:default;}
+.node:hover{transform:translateY(-2px);}
+.node.sage{background:linear-gradient(135deg,#0A1A14,#0E2218);border:1px solid rgba(74,124,111,0.32);}
+.node.sage:hover{box-shadow:0 0 0 1px rgba(94,158,142,0.4),0 12px 40px rgba(74,124,111,0.1);}
+.node.amber{background:linear-gradient(135deg,#1C1200,#241800);border:1px solid rgba(212,131,10,0.32);}
+.node.amber:hover{box-shadow:0 0 0 1px rgba(240,160,32,0.4),0 12px 40px rgba(212,131,10,0.08);}
+.node.purple{background:linear-gradient(135deg,#140A1C,#1C1028);border:1px solid rgba(108,52,131,0.38);}
+.node.purple:hover{box-shadow:0 0 0 1px rgba(142,68,173,0.4),0 12px 40px rgba(108,52,131,0.1);}
+.node.blue{background:linear-gradient(135deg,#06111C,#0A1A2A);border:1px solid rgba(41,128,185,0.28);}
+.node.blue:hover{box-shadow:0 0 0 1px rgba(41,128,185,0.4),0 12px 40px rgba(41,128,185,0.08);}
+.node.gold{background:linear-gradient(135deg,#14100A,#1C1608);border:1px solid rgba(212,172,13,0.28);}
+.node.gold:hover{box-shadow:0 0 0 1px rgba(212,172,13,0.4),0 12px 40px rgba(183,149,11,0.08);}
+.node.teal{background:linear-gradient(135deg,#041410,#071C18);border:1px solid rgba(23,165,137,0.28);}
+.node.teal:hover{box-shadow:0 0 0 1px rgba(23,165,137,0.4),0 12px 40px rgba(14,102,85,0.1);}
+.node.gap{background:repeating-linear-gradient(45deg,rgba(255,255,255,0.015),rgba(255,255,255,0.015) 4px,rgba(255,255,255,0.008) 4px,rgba(255,255,255,0.008) 8px);border:1px dashed rgba(255,255,255,0.1);}
+
+.node-domain{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.06em;margin-bottom:4px;}
+.sage .node-domain{color:var(--sage-hi);}
+.amber .node-domain{color:var(--amber-hi);}
+.purple .node-domain{color:#C39BD3;}
+.blue .node-domain{color:#7FB3D3;}
+.gold .node-domain{color:var(--gold-hi);}
+.teal .node-domain{color:#76D7C4;}
+.gap .node-domain{color:rgba(255,255,255,0.22);}
+
+.node-name{font-family:'Playfair Display',serif;font-size:0.88rem;font-weight:600;color:var(--white);margin-bottom:6px;line-height:1.25;}
+.gap .node-name{color:rgba(255,255,255,0.32);}
+.node-role{font-size:0.68rem;color:rgba(232,244,248,0.45);line-height:1.6;font-weight:300;}
+.gap .node-role{color:rgba(255,255,255,0.2);font-style:italic;}
+
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.tag{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.08em;padding:2px 6px;text-transform:uppercase;}
+.sage .tag{background:rgba(74,124,111,0.12);color:var(--sage-hi);border:1px solid rgba(74,124,111,0.18);}
+.amber .tag{background:rgba(212,131,10,0.1);color:var(--amber-hi);border:1px solid rgba(212,131,10,0.16);}
+.purple .tag{background:rgba(108,52,131,0.12);color:#C39BD3;border:1px solid rgba(108,52,131,0.18);}
+.blue .tag{background:rgba(26,82,118,0.18);color:#7FB3D3;border:1px solid rgba(41,128,185,0.16);}
+.gold .tag{background:rgba(183,149,11,0.12);color:var(--gold-hi);border:1px solid rgba(212,172,13,0.16);}
+.teal .tag{background:rgba(14,102,85,0.15);color:#76D7C4;border:1px solid rgba(23,165,137,0.16);}
+.gap .tag{background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.07);}
+
+.connector{text-align:center;padding:5px 0;font-family:'DM Mono',monospace;font-size:0.52rem;color:rgba(255,255,255,0.1);letter-spacing:0.1em;}
+
+/* TTS PANEL */
+.tts-panel{
+  margin:16px 0;padding:18px 22px;
+  background:linear-gradient(135deg,rgba(183,149,11,0.07),rgba(183,149,11,0.03));
+  border:1px solid rgba(212,172,13,0.22);border-left:3px solid var(--gold-hi);
+}
+.tts-header{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.18em;color:var(--gold-hi);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.tts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.tts-item{padding:10px 12px;background:rgba(183,149,11,0.05);border:1px solid rgba(212,172,13,0.1);}
+.tts-name{font-family:'DM Mono',monospace;font-size:0.55rem;color:var(--gold-hi);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px;}
+.tts-desc{font-size:0.65rem;color:rgba(249,231,159,0.45);line-height:1.5;}
+
+/* WORLDID PANEL */
+.worldid-panel{
+  margin:12px 0;padding:16px 22px;
+  background:linear-gradient(135deg,rgba(108,52,131,0.08),rgba(108,52,131,0.03));
+  border:1px solid rgba(142,68,173,0.22);border-left:3px solid #8E44AD;
+  display:flex;align-items:flex-start;gap:16px;
+}
+.wi-icon{font-size:2rem;flex-shrink:0;margin-top:2px;}
+.wi-title{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.14em;color:#C39BD3;text-transform:uppercase;margin-bottom:5px;}
+.wi-desc{font-size:0.7rem;color:rgba(195,155,211,0.55);line-height:1.6;}
+.wi-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.wi-tag{font-family:'DM Mono',monospace;font-size:0.48rem;letter-spacing:0.08em;padding:2px 7px;border:1px solid rgba(142,68,173,0.2);color:#C39BD3;text-transform:uppercase;}
+
+/* SPATIAL PANEL */
+.spatial-panel{
+  margin:12px 0;padding:18px 22px;
+  background:linear-gradient(135deg,rgba(26,82,118,0.08),rgba(26,82,118,0.03));
+  border:1px solid rgba(41,128,185,0.2);
+  position:relative;overflow:hidden;
+}
+.spatial-panel::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(60deg,transparent,transparent 30px,rgba(255,255,255,0.006) 30px,rgba(255,255,255,0.006) 31px);}
+.spatial-inner{position:relative;z-index:1;}
+.sp-title{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.18em;color:#7FB3D3;text-transform:uppercase;margin-bottom:10px;}
+.sp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.sp-item{padding:10px 12px;background:rgba(26,82,118,0.08);border:1px solid rgba(41,128,185,0.12);}
+.sp-name{font-family:'DM Mono',monospace;font-size:0.52rem;color:#7FB3D3;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;}
+.sp-desc{font-size:0.62rem;color:rgba(127,179,211,0.45);line-height:1.5;}
+
+/* CHAINLINK PANEL */
+.chainlink-panel{
+  margin:12px 0;padding:16px 22px;
+  background:linear-gradient(135deg,rgba(212,131,10,0.06),rgba(212,131,10,0.02));
+  border:1px solid rgba(240,160,32,0.18);
+}
+.cl-title{font-family:'DM Mono',monospace;font-size:0.58rem;letter-spacing:0.16em;color:var(--amber-hi);text-transform:uppercase;margin-bottom:10px;}
+.cl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cl-item{padding:10px 12px;background:rgba(212,131,10,0.05);border:1px solid rgba(212,131,10,0.1);}
+.cl-name{font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--amber-hi);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;}
+.cl-desc{font-size:0.62rem;color:rgba(240,160,32,0.45);line-height:1.5;}
+
+/* ANNUITY BAR */
+.annuity{margin:16px 0;padding:16px 20px;background:linear-gradient(135deg,rgba(212,172,13,0.07),rgba(212,131,10,0.04));border:1px solid rgba(212,172,13,0.18);border-left:3px solid var(--gold-hi);display:flex;align-items:center;gap:14px;}
+.ann-icon{font-size:1.6rem;flex-shrink:0;}
+.ann-hl{font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:600;color:var(--gold-hi);margin-bottom:3px;}
+.ann-sub{font-size:0.68rem;color:rgba(249,231,159,0.5);line-height:1.5;}
+
+/* PARTNER GRID */
+.partner-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:10px;}
+.partner{padding:9px 7px;text-align:center;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);transition:all 0.2s;}
+.partner:hover{border-color:var(--sage-hi);background:rgba(74,124,111,0.07);}
+.p-name{font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:0.07em;color:rgba(255,255,255,0.35);text-transform:uppercase;line-height:1.4;}
+.p-cat{font-size:0.55rem;color:rgba(255,255,255,0.18);margin-top:2px;}
+
+/* CHAIN ROW */
+.chain-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
+.chain-pill{font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:0.08em;padding:4px 10px;border:1px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.3);text-transform:uppercase;transition:all 0.2s;}
+.chain-pill:hover{border-color:var(--sage-hi);color:var(--sage-hi);}
+.chain-pill.hi{border-color:rgba(94,158,142,0.32);color:var(--sage-hi);background:rgba(74,124,111,0.07);}
+.chain-pill.gld{border-color:rgba(212,172,13,0.28);color:var(--gold-hi);background:rgba(183,149,11,0.06);}
+
+/* GOV GRID */
+.gov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:10px;}
+.gov-item{padding:12px 14px;background:rgba(74,124,111,0.05);border:1px solid rgba(74,124,111,0.1);}
+.g-title{font-family:'Playfair Display',serif;font-size:0.8rem;font-weight:600;color:var(--white);margin-bottom:3px;}
+.g-desc{font-size:0.64rem;color:rgba(232,244,248,0.38);line-height:1.5;}
+
+/* METAVERSE */
+.meta-panel{margin-top:10px;padding:18px 22px;background:linear-gradient(135deg,rgba(108,52,131,0.08),rgba(41,128,185,0.05));border:1px solid rgba(108,52,131,0.22);position:relative;overflow:hidden;}
+.meta-panel::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(60deg,transparent,transparent 28px,rgba(255,255,255,0.006) 28px,rgba(255,255,255,0.006) 29px);}
+.meta-inner{position:relative;z-index:1;}
+.meta-title{font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:600;color:#C39BD3;margin-bottom:6px;}
+.meta-desc{font-size:0.68rem;color:rgba(195,155,211,0.5);line-height:1.6;margin-bottom:12px;}
+.meta-nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.mn{padding:10px 12px;background:rgba(108,52,131,0.08);border:1px solid rgba(108,52,131,0.14);}
+.mn-title{font-family:'DM Mono',monospace;font-size:0.52rem;color:#C39BD3;letter-spacing:0.08em;margin-bottom:3px;text-transform:uppercase;}
+.mn-desc{font-size:0.62rem;color:rgba(195,155,211,0.42);line-height:1.5;}
+
+/* BUILDITFOR */
+.builditfor{margin-top:24px;padding:20px 22px;background:linear-gradient(135deg,rgba(15,30,46,0.7),rgba(26,47,68,0.5));border:1px solid rgba(94,158,142,0.18);border-top:2px solid var(--sage-hi);text-align:center;}
+.bf-label{font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:0.2em;color:var(--sage-hi);text-transform:uppercase;margin-bottom:6px;}
+.bf-url{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:5px;}
+.bf-url span{color:var(--sage-hi);}
+.bf-desc{font-size:0.68rem;color:rgba(232,244,248,0.35);line-height:1.55;max-width:440px;margin:0 auto;}
+
+/* LEGEND */
+.legend{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:5px;font-size:0.62rem;color:rgba(255,255,255,0.25);}
+.ld{width:7px;height:7px;border-radius:50%;}
+
+@media(max-width:768px){
+  .anchors,.cols-3,.cols-4{grid-template-columns:1fr 1fr;}
+  .cols-2{grid-template-columns:1fr;}
+  .tts-grid,.sp-grid,.cl-grid,.meta-nodes{grid-template-columns:1fr 1fr;}
+  .gov-grid{grid-template-columns:1fr;}
+  .partner-grid{grid-template-columns:repeat(3,1fr);}
+  body{padding:20px 12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="vbar">
+  <span class="vtag">// DAPTRA Ecosystem · Version 3.0</span>
+  <span class="vdate">Sovereign Spatial Identity Architecture · 2026</span>
+</div>
+
+<h1>DAPTRA <span>Ecosystem</span></h1>
+<div class="subtitle">Digital Asset Property & Title Registry Appraisal · Global Infrastructure Standard</div>
+
+<!-- SOVEREIGN IDENTITY STACK -->
+<div class="identity-stack">
+  <div class="is-title">⬡ The DAPTRA Sovereign Property Identity</div>
+  <div class="is-tagline">Every registered property gets five permanent anchors — baked into a single immutable instrument.</div>
+  <div class="is-sub">DAPTRA doesn't just record who owns property. We record that the property exists, exactly where it exists, what it's worth, and who owns it — anchored in time — in a single verified instrument that cannot be forged, disputed, or lost.</div>
+  <div class="anchors">
+    <div class="anchor sage">
+      <div class="anchor-num">01</div>
+      <div class="anchor-icon">⬡</div>
+      <div class="anchor-name">Title Domain NFT</div>
+      <div class="anchor-desc">ERC-3643 compliant ownership instrument. Wallet-bound. The who.</div>
+      <div class="anchor-abbr">NFTitleMint</div>
+    </div>
+    <div class="anchor amber">
+      <div class="anchor-num">02</div>
+      <div class="anchor-icon">◈</div>
+      <div class="anchor-name">Certified Appraisal</div>
+      <div class="anchor-desc">Verified market value locked at mint. Chainlink oracle for live updates. The worth.</div>
+      <div class="anchor-abbr">DAPTRA.org</div>
+    </div>
+    <div class="anchor blue">
+      <div class="anchor-num">03</div>
+      <div class="anchor-icon">⊕</div>
+      <div class="anchor-name">Spatial Coordinates</div>
+      <div class="anchor-desc">Lat/long + parcel boundary + structural footprint. Pinned forever. The where.</div>
+      <div class="anchor-abbr">Regrid · Esri</div>
+    </div>
+    <div class="anchor purple">
+      <div class="anchor-num">04</div>
+      <div class="anchor-icon">◉</div>
+      <div class="anchor-name">World ID · KYC/AML</div>
+      <div class="anchor-desc">Proof of personhood via Worldcoin. Verified not held. The who is real.</div>
+      <div class="anchor-abbr">Worldcoin</div>
+    </div>
+    <div class="anchor gold">
+      <div class="anchor-num">05</div>
+      <div class="anchor-icon">◷</div>
+      <div class="anchor-name">Temporal Timestamp</div>
+      <div class="anchor-desc">Block timestamp + physical world verification timestamp. The when.</div>
+      <div class="anchor-abbr">TTS · Onchain</div>
+    </div>
+  </div>
+</div>
+
+<!-- TTS -->
+<div class="tts-panel">
+  <div class="tts-header">◷ TTS — Temporal Timestamp Standard</div>
+  <div class="tts-grid">
+    <div class="tts-item">
+      <div class="tts-name">Block Timestamp</div>
+      <div class="tts-desc">Immutable onchain timestamp at exact block of mint. Cryptographically verifiable. Cannot be altered retroactively.</div>
+    </div>
+    <div class="tts-item">
+      <div class="tts-name">Physical Attestation</div>
+      <div class="tts-desc">Geotagged photo or appointment verification at the parcel. Human attestation of physical existence at a specific moment in time.</div>
+    </div>
+    <div class="tts-item">
+      <div class="tts-name">Forensic Record</div>
+      <div class="tts-desc">Court-admissible "as of this moment, this is ground truth" record. Critical for insurance claims, title disputes, and eminent domain proceedings.</div>
+    </div>
+  </div>
+</div>
+
+<!-- WORLDID KYC -->
+<div class="worldid-panel">
+  <div class="wi-icon">🌐</div>
+  <div>
+    <div class="wi-title">Worldcoin World ID — KYC / AML / Proof of Personhood</div>
+    <div class="wi-desc">Every NFTitleMint requires a World ID proof — one tap, identity verified, zero PII held by DAPTRA. Proof of personhood without storing sensitive data. AML compliance baked in. Mini App integration puts DAPTRA natively inside the Worldcoin ecosystem — instant access to their entire verified global user base. The cleanest KYC architecture available and the only one that scales globally without a compliance liability.</div>
+    <div class="wi-tags">
+      <div class="wi-tag">Proof of Personhood</div>
+      <div class="wi-tag">Zero PII Held</div>
+      <div class="wi-tag">AML Compliant</div>
+      <div class="wi-tag">Mini App</div>
+      <div class="wi-tag">Global Scale</div>
+      <div class="wi-tag">FinCEN Ready</div>
+    </div>
+  </div>
+</div>
+
+<!-- ANNUITY -->
+<div class="annuity">
+  <div class="ann-icon">🏦</div>
+  <div>
+    <div class="ann-hl">"Put Your House in the Annuity Bank"</div>
+    <div class="ann-sub">Tokenization unlocks yield, insurance efficiency, tax optimization, and institutional collateral. Participation is incentivized. Non-participation has a cost. The five-anchor instrument makes every registered property the most verifiable asset in the financial system.</div>
+  </div>
+</div>
+
+<!-- L1 CONSUMER -->
+<div class="layer">
+  <div class="layer-label">Layer 1 · Consumer Funnel & First Fee</div>
+  <div class="nodes cols-1">
+    <div class="node sage">
+      <div class="node-domain">protectreal.com / .net</div>
+      <div class="node-name">ProtectReal — Client Acquisition, Onboarding & Agent Referral</div>
+      <div class="node-role">Front door for homeowners, agents, and brokers. Fraud protection entry point. NFTitleMint is the first fee. No forced tokenization. Agent/broker referral codes built in. Wallet setup and World ID KYC initiated here. Appointment scheduling for physical verification tied to TTS.</div>
+      <div class="tags"><span class="tag">Consumer</span><span class="tag">Agent Referral</span><span class="tag">First Fee</span><span class="tag">World ID</span><span class="tag">TTS Appointment</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="connector">↓ first fee triggers</div>
+
+<!-- L2 MINT + TRUST -->
+<div class="layer">
+  <div class="layer-label">Layer 2 · Minting Studio & Repository Trust</div>
+  <div class="nodes cols-2">
+    <div class="node amber">
+      <div class="node-domain">titlemint.onchain</div>
+      <div class="node-name">TitleMint Studio — NFT Minting Engine</div>
+      <div class="node-role">Mints the five-anchor property identity. Address + World ID proof + spatial coordinates + TTS block timestamp + certified appraisal value locked. No value pre-assigned until appraisal — assessed value shown as reference only with clear "not recommended" advisory. Appraiser selected from DAPTRA.net network or client's own certified appraiser.</div>
+      <div class="tags"><span class="tag">5-Anchor Mint</span><span class="tag">No Pre-Value</span><span class="tag">ERC-3643</span><span class="tag">TTS Lock</span><span class="tag">World ID</span></div>
+    </div>
+    <div class="node purple">
+      <div class="node-domain">daptra.org</div>
+      <div class="node-name">Repository Trust — Legal & Custodial Vault</div>
+      <div class="node-role">Appraisal lock, tokenization wrapper, custodial rules, succession/estate logic, and TTS forensic record finalized here. Trust, LLC, and entity structuring handled at this layer. DTCC and Canton compatibility confirmed. The instrument is legally complete before going onchain.</div>
+      <div class="tags"><span class="tag">Custodial</span><span class="tag">Legal Wrapper</span><span class="tag">TTS Forensic</span><span class="tag">DTCC Ready</span><span class="tag">Nonprofit</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SPATIAL LAYER -->
+<div class="spatial-panel">
+  <div class="spatial-inner">
+    <div class="sp-title">⊕ Spatial Identity Layer — The Infrastructure Differentiator</div>
+    <div class="sp-grid">
+      <div class="sp-item">
+        <div class="sp-name">Lat / Long Pin</div>
+        <div class="sp-desc">Exact coordinates of every structure permanently recorded and anchored to the token. Regrid parcel centroid data.</div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-name">Parcel Boundary</div>
+        <div class="sp-desc">Full GeoJSON parcel polygon recorded onchain. The exact legal footprint of the land. Indisputable.</div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-name">Structure Footprint</div>
+        <div class="sp-desc">Building dimensions and footprint from Regrid/Nearmap satellite. Physical existence verified at registration appointment.</div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-name">Satellite Snapshot</div>
+        <div class="sp-desc">Aerial image of the exact parcel captured and pinned at time of TTS. Visual ground truth locked forever.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAINLINK -->
+<div class="chainlink-panel">
+  <div class="cl-title">⬡ Chainlink — The Nervous System of DAPTRA</div>
+  <div class="cl-grid">
+    <div class="cl-item">
+      <div class="cl-name">Price Feeds</div>
+      <div class="cl-desc">Live property valuation updates post-mint. Oracle truth for collateral value.</div>
+    </div>
+    <div class="cl-item">
+      <div class="cl-name">Proof of Reserve</div>
+      <div class="cl-desc">Verifies physical asset backing any fractionalized or collateralized token.</div>
+    </div>
+    <div class="cl-item">
+      <div class="cl-name">CCIP</div>
+      <div class="cl-desc">Cross-chain interoperability when the title token moves between chains.</div>
+    </div>
+    <div class="cl-item">
+      <div class="cl-name">Automation</div>
+      <div class="cl-desc">PMI cancellation, insurance payouts, appraisal refresh — all triggered autonomously.</div>
+    </div>
+  </div>
+</div>
+
+<div class="connector">↓ finalizes into</div>
+
+<!-- L3 PROTOCOL -->
+<div class="layer">
+  <div class="layer-label">Layer 3 · Core Onchain Protocol</div>
+  <div class="nodes cols-1">
+    <div class="node sage">
+      <div class="node-domain">daptra.onchain</div>
+      <div class="node-name">DAPTRA Protocol — Global Spatial Property Registrar</div>
+      <div class="node-role">The definitive onchain registrar of global addressed deeds of title — anchored to five sovereign identity layers. Omnichain routing via LayerZero. Chainlink oracle nervous system. Stablecoin yield layer — USDC, PYUSD, Ondo USDY. DTCC/Canton institutional settlement rails. Security, forensics, and data analytics infrastructure for every registered parcel on earth.</div>
+      <div class="tags"><span class="tag">Global Registrar</span><span class="tag">5-Anchor</span><span class="tag">Spatial Registry</span><span class="tag">Forensics</span><span class="tag">Security</span><span class="tag">Analytics</span><span class="tag">DTCC/Canton</span></div>
+    </div>
+  </div>
+  <div class="chain-row">
+    <div class="chain-pill hi">LayerZero</div>
+    <div class="chain-pill hi">XRP Ledger</div>
+    <div class="chain-pill hi">Chainlink CCIP</div>
+    <div class="chain-pill gld">DTCC / Canton</div>
+    <div class="chain-pill gld">Securitize</div>
+    <div class="chain-pill gld">Brikken · BTC</div>
+    <div class="chain-pill">Stellar</div>
+    <div class="chain-pill">Algorand</div>
+    <div class="chain-pill">Hedera</div>
+    <div class="chain-pill">Polygon</div>
+    <div class="chain-pill">Solana</div>
+    <div class="chain-pill">ERC-3643</div>
+  </div>
+</div>
+
+<div class="connector">↓ distributed across</div>
+
+<!-- L4 NETWORK + EDUCATION -->
+<div class="layer">
+  <div class="layer-label">Layer 4 · Partner Network & Knowledge Commons</div>
+  <div class="nodes cols-2">
+    <div class="node blue">
+      <div class="node-domain">daptra.net</div>
+      <div class="node-name">Partner Network — B2B & Appraiser Registry</div>
+      <div class="node-role">Certified appraiser network — clients select from verified pool or submit their own. Real estate brokerages, title companies, insurers, lenders, GSE partners. Agent/broker referral yield tracked here. Parametric insurance, PMI auto-cancellation, and mortgage integration portals. Plaid for mortgage/lien verification at mint.</div>
+      <div class="tags"><span class="tag">Appraiser Network</span><span class="tag">Title Co.</span><span class="tag">Insurance</span><span class="tag">Plaid</span><span class="tag">GSE</span><span class="tag">Referral Yield</span></div>
+    </div>
+    <div class="node blue">
+      <div class="node-domain">protectreal.u</div>
+      <div class="node-name">RWA Education Hub — Encyclopedic & Non-Biased</div>
+      <div class="node-role">Unbiased reference for the entire RWA industry. All participants — DAPTRA, competitors, standards, chains, regulators, partners. Built for realtors, investors, governments, and consumers equally. No sales language. Includes the DAPTRA Coordinate Standard documentation for industry adoption.</div>
+      <div class="tags"><span class="tag">Non-Biased</span><span class="tag">Encyclopedic</span><span class="tag">All Participants</span><span class="tag">Coord Standard</span><span class="tag">Realtor</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- L5 GOV -->
+<div class="layer">
+  <div class="layer-label">Layer 5 · Government, Security & Forensics</div>
+  <div class="gov-grid">
+    <div class="gov-item">
+      <div class="g-title">Recording Fee Revenue</div>
+      <div class="g-desc">Every mint, transfer, and lien is a recordable event. Tokenization scales volume. Counties earn more with zero overhead increase.</div>
+    </div>
+    <div class="gov-item">
+      <div class="g-title">Forensic Title Record</div>
+      <div class="g-desc">TTS makes DAPTRA court-admissible. Title disputes, flood claims, fire investigations, boundary disputes — DAPTRA is ground truth.</div>
+    </div>
+    <div class="gov-item">
+      <div class="g-title">Security Infrastructure</div>
+      <div class="g-desc">Spatial coordinates + TTS = a security perimeter for every registered property. Unauthorized activity at exact coordinates triggers the agent layer.</div>
+    </div>
+    <div class="gov-item">
+      <div class="g-title">AML / KYC Audit Trail</div>
+      <div class="g-desc">World ID + ERC-3643 = verified identity on every token. FinCEN, CFPB, and state regulators get an audit trail for real estate they've never had.</div>
+    </div>
+    <div class="gov-item">
+      <div class="g-title">Data Analytics</div>
+      <div class="g-desc">At scale, every registered parcel feeds a verified spatial intelligence network. Urban planning, climate risk, infrastructure investment — all ground truth data.</div>
+    </div>
+    <div class="gov-item">
+      <div class="g-title">Global Land Registry</div>
+      <div class="g-desc">DAPTRA.onchain as turnkey national land registry for emerging markets. Honduras, Rwanda, Georgia. Global credibility. The ISO of spatial property identity.</div>
+    </div>
+  </div>
+</div>
+
+<!-- L6 PARTNERS -->
+<div class="layer">
+  <div class="layer-label">Layer 6 · Industry Partner Ecosystem</div>
+  <div class="partner-grid">
+    <div class="partner"><div class="p-name">Worldcoin</div><div class="p-cat">KYC/AML</div></div>
+    <div class="partner"><div class="p-name">Chainlink</div><div class="p-cat">Oracle/CCIP</div></div>
+    <div class="partner"><div class="p-name">Regrid</div><div class="p-cat">Parcel Data</div></div>
+    <div class="partner"><div class="p-name">Securitize</div><div class="p-cat">Transfer Agent</div></div>
+    <div class="partner"><div class="p-name">DTCC</div><div class="p-cat">Settlement</div></div>
+    <div class="partner"><div class="p-name">Canton</div><div class="p-cat">Inst. Chain</div></div>
+    <div class="partner"><div class="p-name">Brikken</div><div class="p-cat">BTC Exposure</div></div>
+    <div class="partner"><div class="p-name">Circle USDC</div><div class="p-cat">Stablecoin</div></div>
+    <div class="partner"><div class="p-name">Ondo USDY</div><div class="p-cat">Yield Stable</div></div>
+    <div class="partner"><div class="p-name">Plaid</div><div class="p-cat">Mortgage/Lien</div></div>
+    <div class="partner"><div class="p-name">Esri</div><div class="p-cat">GIS/Spatial</div></div>
+    <div class="partner"><div class="p-name">Nearmap</div><div class="p-cat">Satellite</div></div>
+    <div class="partner"><div class="p-name">Fannie Mae</div><div class="p-cat">GSE Pilot</div></div>
+    <div class="partner"><div class="p-name">Freddie Mac</div><div class="p-cat">GSE Pilot</div></div>
+    <div class="partner"><div class="p-name">Appraisal Foundation</div><div class="p-cat">Certification</div></div>
+    <div class="partner"><div class="p-name">Lemonade</div><div class="p-cat">Parametric Ins.</div></div>
+    <div class="partner"><div class="p-name">Ceramic</div><div class="p-cat">Decen. Storage</div></div>
+    <div class="partner"><div class="p-name">builditfor.web3</div><div class="p-cat">Builder Layer</div></div>
+  </div>
+</div>
+
+<!-- L7 METAVERSE -->
+<div class="layer">
+  <div class="layer-label">Layer 7 · Spatial Metaverse & Physical AI Overlay</div>
+  <div class="meta-panel">
+    <div class="meta-inner">
+      <div class="meta-title">Every Registered Address Has a Living Sovereign Digital Twin</div>
+      <div class="meta-desc">The five-anchor identity feeds the spatial layer. Physical sensors and robotic eyes keep the digital twin live. AI agents inhabit the digispace. Humans and agents meet at the property's exact coordinates — in the physical world and the digital world simultaneously.</div>
+      <div class="meta-nodes">
+        <div class="mn"><div class="mn-title">Digital Twin</div><div class="mn-desc">Live 3D replica anchored to exact lat/long. TTS-stamped. Fed by IoT and satellite.</div></div>
+        <div class="mn"><div class="mn-title">Agentic Presence</div><div class="mn-desc">Autonomous DAPTRA agent inhabits the property digispace. Answers title questions, detects anomalies, alerts owner.</div></div>
+        <div class="mn"><div class="mn-title">Sensor / IoT Layer</div><div class="mn-desc">Physical sensors feed the agent and the TTS forensic record simultaneously.</div></div>
+        <div class="mn"><div class="mn-title">VenueX Interface</div><div class="mn-desc">The AR spatial overlay that makes all of this visible and navigable to humans in the real world.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUILDITFOR -->
+<div class="builditfor">
+  <div class="bf-label">// Meta Layer · Builder Platform</div>
+  <div class="bf-url">builditfor<span>.web3</span></div>
+  <div class="bf-desc">The platform above the protocol. Community, tools, and launchpad for everything built on or adjacent to DAPTRA. Where the next layer of the stack gets imagined, funded, and shipped.</div>
+</div>
+
+<div class="legend">
+  <div class="li"><div class="ld" style="background:#5E9E8E"></div>Core / Consumer</div>
+  <div class="li"><div class="ld" style="background:#F0A020"></div>Minting</div>
+  <div class="li"><div class="ld" style="background:#8E44AD"></div>Trust / Legal</div>
+  <div class="li"><div class="ld" style="background:#2980B9"></div>Network / Education</div>
+  <div class="li"><div class="ld" style="background:#17A589"></div>KYC / Spatial</div>
+  <div class="li"><div class="ld" style="background:#D4AC0D"></div>Institutional / TTS</div>
+  <div class="li"><div class="ld" style="background:#C39BD3"></div>Spatial / Metaverse</div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ProtectReal — On-Chain Title Protection for Your Home</title>
